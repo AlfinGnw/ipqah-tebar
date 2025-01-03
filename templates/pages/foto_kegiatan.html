@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Foto Kegiatan - SIMAQAH{% endblock %}
+
+{% block content %}
+    <!-- Navbar -->
+    {% include 'components/navbar.html' %}
+
+    <div class="container py-5 mt-5"> <!-- Menambahkan mt-5 untuk memberi jarak antara navbar dan konten -->
+        <h2 class="text-center mb-4">Foto Kegiatan</h2>
+        <div class="row">
+            {% for item in photos %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card border-0">
+                    <img src="{{ url_for('static', filename='uploads/photos/' ~ item.filename) }}" class="card-img-top img-fluid" alt="{{ item.judul }}" style="height: 250px; width: 100%; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.judul }}</h5>
+                        <p class="card-text">{{ item.deskripsi|truncate(100) }}</p> <!-- Menampilkan deskripsi singkat -->
+                        <p class="text-muted">{{ item.tanggal.strftime('%d %B %Y') }}</p> <!-- Menampilkan tanggal -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

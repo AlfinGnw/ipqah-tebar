@@ -1,0 +1,272 @@
+{% extends "pages/admin/base.html" %}
+
+{% block title %}Kelola Donasi{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-1">Kelola Donasi</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDonationModal">
+            <i class="fas fa-plus me-2"></i>Tambah Donasi
+        </button>
+    </div>
+
+    <div class="mb-3">
+        <h5>Total Donasi: <span id="totalDonation">0</span></h5>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nama Penyumbang</th>
+                            <th>Jumlah Sumbangan</th>
+                            <th>Tujuan Sumbangan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for donation in donations %}
+                        <tr>
+                            <td>{{ donation.nama_penyumbang }}</td>
+                            <td>{{ donation.jumlah_sumbangan }}</td>
+                            <td>{{ donation.tujuan_sumbangan }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning edit-donation" data-id="{{ donation._id }}" 
+                                        data-nama="{{ donation.nama_penyumbang }}" data-jumlah="{{ donation.jumlah_sumbangan }}"
+                                        data-tujuan="{{ donation.tujuan_sumbangan }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger delete-donation" data-id="{{ donation._id }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-success" id="printDonation">Print to PDF</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Donation Modal -->
+<div class="modal fade" id="addDonationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Donasi Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addDonationForm">
+                    <div class="mb-3">
+                        <label class="form-label">Nama Penyumbang</label>
+                        <input type="text" class="form-control" name="nama_penyumbang" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah Sumbangan</label>
+                        <input type="number" class="form-control" name="jumlah_sumbangan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tujuan Sumbangan</label>
+                        <input type="text" class="form-control" name="tujuan_sumbangan" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="submitAddDonation">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Donation Modal -->
+<div class="modal fade" id="editDonationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Donasi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editDonationForm">
+                    <input type="hidden" name="donation_id">
+                    <div class="mb-3">
+                        <label class="form-label">Nama Penyumbang</label>
+                        <input type="text" class="form-control" name="nama_penyumbang" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah Sumbangan</label>
+                        <input type="number" class="form-control" name="jumlah_sumbangan" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tujuan Sumbangan</label>
+                        <input type="text" class="form-control" name="tujuan_sumbangan" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="submitEditDonation">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fungsi untuk menghitung total donasi
+        function calculateTotalDonation() {
+            let total = 0;
+            document.querySelectorAll('#donationTable tbody tr').forEach(row => {
+                const amount = parseFloat(row.cells[2].innerText);
+                total += amount;
+            });
+            document.getElementById('totalDonation').innerText = total;
+        }
+    
+        calculateTotalDonation();
+    
+        // Tambah Donasi
+        document.getElementById('submitAddDonation').addEventListener('click', function() {
+            const form = document.getElementById('addDonationForm');
+            const formData = new FormData(form);
+    
+            fetch('/admin/kelola-donasi/tambah', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+    
+        // Edit Donasi
+        document.querySelectorAll('.edit-donation').forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('editDonationModal'));
+                const form = document.getElementById('editDonationForm');
+                
+                form.donation_id.value = this.dataset.id;
+                form.nama_penyumbang.value = this.dataset.nama;
+                form.jumlah_sumbangan.value = this.dataset.jumlah;
+                form.tujuan_sumbangan.value = this.dataset.tujuan;
+                
+                modal.show();
+            });
+        });
+    
+        document.getElementById('submitEditDonation').addEventListener('click', function() {
+            const form = document.getElementById('editDonationForm');
+            const formData = new FormData(form);
+            const donationId = form.donation_id.value;
+    
+            fetch(`/admin/kelola-donasi/edit/${donationId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+    
+        // Hapus Donasi
+        document.querySelectorAll('.delete-donation').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('Apakah Anda yakin ingin menghapus donasi ini?')) {
+                    const donationId = this.dataset.id;
+                    
+                    fetch(`/admin/kelola-donasi/hapus/${donationId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+                }
+            });
+        });
+    
+        document.getElementById('printDonation').addEventListener('click', function() {
+    const rows = Array.from(document.querySelectorAll('#donationTable tbody tr')).map((row, index) => {
+        const nama = row.cells[0].innerText; // Kolom nama penyumbang
+        const jumlah = row.cells[1].innerText; // Kolom jumlah sumbangan
+        const tujuan = row.cells[2].innerText; // Kolom tujuan sumbangan
+
+        return `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${nama}</td>
+                <td>${jumlah}</td>
+                <td>${tujuan}</td>
+            </tr>
+        `;
+    }).join('');
+
+    const totalDonation = document.getElementById('totalDonation').innerText;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Laporan Donasi</title>
+            <style>
+                body { font-family: Arial, sans-serif; }
+                h1 { text-align: center; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .total { font-weight: bold; margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <h1>Laporan Donasi IPQAH Teupah Barat</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Penyumbang</th>
+                        <th>Jumlah Sumbangan</th>
+                        <th>Tujuan Sumbangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows}
+                </tbody>
+            </table>
+            <p class="total">Total Donasi: Rp ${totalDonation}</p>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+});
+
+    });
+    </script>
+    
+{% endblock %}

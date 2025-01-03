@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Detail Berita - SIMAQAH{% endblock %}
+
+{% block content %}
+<!-- Navbar -->
+{% include 'components/navbar.html' %}
+
+<div class="container py-5">
+    <!-- Menambahkan margin atas untuk judul berita -->
+    <h2 class="text-center mb-4 mt-5">{{ berita.judul }}</h2>
+    
+    <!-- Mengatur ukuran gambar agar tidak terlalu kecil atau besar dan tetap di tengah -->
+    <div class="text-center mb-4">
+        <img src="{{ url_for('static', filename='uploads/berita/' ~ berita.foto) }}" class="img-fluid" alt="{{ berita.judul }}" style="max-height: 400px; width: auto; object-fit: cover;">
+    </div>
+    
+    <div class="mb-3">
+        <span class="text-muted">Dipublish oleh {{ berita.penulis }} pada {{ berita.tanggal.strftime('%d %B %Y') }}</span>
+    </div>
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Beranda</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('berita') }}">Berita</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ berita.judul }}</li>
+            </ol>
+        </nav>
+        
+        
+        
+        <p class="mt-4">{{ berita.deskripsi }}</p>
+        <div class="mt-4">{{ berita.isi|safe }}</div> <!-- Menampilkan isi berita dengan HTML -->
+    </div>
+    
+    {% endblock %}

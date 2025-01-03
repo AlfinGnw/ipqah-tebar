@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Berita Kegiatan - SIMAQAH{% endblock %}
+
+{% block content %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .news-title {
+            color: #4a4949;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none; /* Menghilangkan garis bawah */
+        }
+        .news-title:hover {
+            text-decoration: underline; /* Garis bawah saat hover */
+        }
+        .news-category {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .news-meta {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        .news-description {
+            color: #212529;
+        }
+        .share-buttons {
+            margin-top: 0.5rem;
+        }
+        .share-buttons .btn {
+            font-size: 0.875rem;
+        }
+    </style>
+
+    <!-- Navbar -->
+    {% include 'components/navbar.html' %}
+
+    <div class="container py-5 mt-4">
+        <h2 class="text-center mb-4">Berita Kegiatan</h2>
+
+                <!-- Form Pencarian -->
+                <form method="GET" action="{{ url_for('berita') }}" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" name="query" class="form-control" placeholder="Cari berita..." aria-label="Cari berita...">
+                        <button class="btn btn-danger" type="submit">Cari</button>
+                    </div>
+                </form>
+
+        <div class="row mb-4">
+            {% for item in berita %}
+            <div class="col-md-8 mx-auto mb-4"> <!-- Menambahkan mx-auto untuk memusatkan kolom -->
+                <div class="news-category">
+                    {{ item.kategori }} <!-- Menampilkan kategori berita -->
+                </div>
+                <a class="news-title" href="{{ url_for('detail_berita', id=item._id) }}">
+                    {{ item.judul }}
+                </a>
+                <div class="news-description mt-2">
+                    {{ item.isi|safe|truncate(100) }} <!-- Coba tampilkan deskripsi dengan truncate -->
+                </div>
+                <div class="news-meta mt-2">
+                    {{ item.penulis }} • {{ item.tanggal.strftime('%d %B %Y') }}
+                </div>
+                <div class="share-buttons mt-2">
+                    <button class="btn btn-danger" onclick="shareOnFacebook('{{ url_for('detail_berita', id=item._id) }}')">
+                        <i class="fas fa-share"></i> Share on Facebook
+                    </button>
+                    <button class="btn btn-info" onclick="shareOnTwitter('{{ url_for('detail_berita', id=item._id) }}')">
+                        <i class="fas fa-share"></i> Share on Twitter
+                    </button>
+                    <button class="btn btn-success" onclick="shareOnWhatsApp('{{ url_for('detail_berita', id=item._id) }}')">
+                        <i class="fas fa-share"></i> Share on WhatsApp
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+            <a href="{{ url_for('detail_berita', id=item._id) }}">
+                <img src="{{ url_for('static', filename='uploads/berita/' ~ item.foto) }}" class="img-fluid" alt="{{ item.judul }}" style="height: 200px; object-fit: cover;">
+            </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function shareOnFacebook(url) {
+            window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank');
+        }
+
+        function shareOnTwitter(url) {
+            window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=Check this out!', '_blank');
+        }
+
+        function shareOnWhatsApp(url) {
+            window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(url), '_blank');
+        }
+    </script>
+
+{% endblock %}

@@ -1,0 +1,301 @@
+{% extends "pages/admin/base.html" %}
+
+{% block title %}Kelola Berita{% endblock %}
+
+{% block head %}
+<!-- jQuery first -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Summernote CSS -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+<!-- Summernote JS -->
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    .note-editor {
+        margin-bottom: 20px;
+    }
+    .note-editing-area {
+        min-height: 300px;
+    }
+    .content-preview img, .content-preview video {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Kelola Berita</h2>
+            <p class="text-muted">Manajemen artikel berita</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBeritaModal">
+                <i class="fas fa-plus me-2"></i>Tambah Berita
+            </button>
+        </div>
+    </div>
+
+    <!-- Berita Cards -->
+    <div class="row g-4">
+        {% for item in berita %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <img src="{{ url_for('static', filename='uploads/berita/' + item.foto) }}" 
+                     class="card-img-top" alt="{{ item.judul }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.judul }}</h5>
+                    <p class="card-text text-muted">
+                        <small>
+                            <i class="fas fa-user me-1"></i>{{ item.penulis }} |
+                            <i class="fas fa-calendar me-1"></i>{{ item.tanggal.strftime('%d %b %Y') }}
+                        </small>
+                    </p>
+                    <p class="card-text">{{ item.isi|striptags|truncate(150) }}</p>
+                    <span class="badge bg-primary mb-3">{{ item.kategori }}</span>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-warning btn-sm edit-berita" 
+                                data-id="{{ item._id }}"
+                                data-judul="{{ item.judul }}"
+                                data-isi="{{ item.isi }}"
+                                data-kategori="{{ item.kategori }}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-berita" data-id="{{ item._id }}">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Berita Modal -->
+<div class="modal fade" id="addBeritaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Berita Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addBeritaForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Judul Berita</label>
+                        <input type="text" class="form-control" name="judul" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kategori</label>
+                        <select class="form-select" name="kategori" required>
+                            <option value="Umum">Umum</option>
+                            <option value="Pendidikan">Pendidikan</option>
+                            <option value="Kegiatan">Kegiatan</option>
+                            <option value="Pengumuman">Pengumuman</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Foto</label>
+                        <input type="file" class="form-control" name="foto" accept="image/*" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Isi Berita</label>
+                        <textarea class="form-control summernote" id="addBeritaContent" name="isi" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="submitAddBerita">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Berita Modal -->
+<div class="modal fade" id="editBeritaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Berita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editBeritaForm" enctype="multipart/form-data">
+                    <input type="hidden" name="berita_id">
+                    <div class="mb-3">
+                        <label class="form-label">Judul Berita</label>
+                        <input type="text" class="form-control" name="judul" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kategori</label>
+                        <select class="form-select" name="kategori" required>
+                            <option value="Umum">Umum</option>
+                            <option value="Pendidikan">Pendidikan</option>
+                            <option value="Kegiatan">Kegiatan</option>
+                            <option value="Pengumuman">Pengumuman</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Foto Baru (kosongkan jika tidak diubah)</label>
+                        <input type="file" class="form-control" name="foto" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Isi Berita</label>
+                        <textarea class="form-control summernote" id="editBeritaContent" name="isi" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="submitEditBerita">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Konfigurasi Summernote
+    const summernoteConfig = {
+        placeholder: 'Tulis isi berita di sini...',
+        height: 300,
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'underline', 'italic', 'clear']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'video']],
+            ['view', ['fullscreen', 'codeview', 'help']]
+        ],
+        callbacks: {
+            onImageUpload: function(files) {
+                // Upload gambar
+                for(let file of files) {
+                    uploadImage(file, this);
+                }
+            }
+        }
+    };
+
+    // Inisialisasi Summernote
+    $('.summernote').summernote(summernoteConfig);
+
+    // Fungsi untuk upload gambar
+    function uploadImage(file, editor) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/admin/upload-media', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                $(editor).summernote('insertImage', data.url);
+            } else {
+                alert('Upload gagal: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Tambah Berita
+    document.getElementById('submitAddBerita').addEventListener('click', function() {
+        const form = document.getElementById('addBeritaForm');
+        const formData = new FormData(form);
+        
+        // Ambil konten dari Summernote
+        formData.set('isi', $('#addBeritaContent').summernote('code'));
+
+        fetch('/admin/kelola-berita/tambah', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        });
+    });
+
+    // Edit Berita
+    document.querySelectorAll('.edit-berita').forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('editBeritaModal'));
+            const form = document.getElementById('editBeritaForm');
+            
+            form.berita_id.value = this.dataset.id;
+            form.judul.value = this.dataset.judul;
+            form.kategori.value = this.dataset.kategori;
+            
+            // Set konten ke Summernote
+            $('#editBeritaContent').summernote('code', this.dataset.isi);
+            
+            modal.show();
+        });
+    });
+
+    document.getElementById('submitEditBerita').addEventListener('click', function() {
+        const form = document.getElementById('editBeritaForm');
+        const formData = new FormData(form);
+        const beritaId = form.berita_id.value;
+
+        // Ambil konten dari Summernote
+        formData.set('isi', $('#editBeritaContent').summernote('code'));
+
+        fetch(`/admin/kelola-berita/edit/${beritaId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        });
+    });
+
+    // Event listener untuk tombol delete berita
+    $('.delete-berita').on('click', function() {
+        const beritaId = $(this).data('id');
+
+        if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
+            fetch(`/admin/kelola-berita/hapus/${beritaId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert('Gagal menghapus berita: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menghapus berita');
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

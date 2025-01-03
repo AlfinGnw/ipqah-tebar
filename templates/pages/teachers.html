@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Data Guru - SIMAQAH{% endblock %}
+
+{% block content %}
+    <!-- Navbar -->
+    {% include 'components/navbar.html' %}
+
+    <div class="container py-5 mt-5">
+        <h2 class="text-center mb-4">Data Guru</h2>
+        <div class="row">
+            {% for item in teachers %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card d-flex flex-row border-0">
+                    <img src="{{ url_for('static', filename='uploads/teachers/' ~ item.foto) }}" class="card-img-left rounded-circle" alt="{{ item.nama }}" style="width: 100px; height: 100px; object-fit: cover; margin: 15px;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.nama }}</h5>
+                        <p class="card-text">{{ item.jabatan }}</p> <!-- Menampilkan jabatan -->
+                        <p class="text-muted">{{ item.tanggal.strftime('%d %B %Y') }}</p> <!-- Menampilkan tanggal -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

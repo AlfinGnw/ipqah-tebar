@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Video Kegiatan - SIMAQAH{% endblock %}
+
+{% block content %}
+    <!-- Navbar -->
+    {% include 'components/navbar.html' %}
+
+    <div class="container py-5 mt-5">
+        <h2 class="text-center mb-4">Video Kegiatan</h2>
+        <div class="row">
+            {% for video in videos %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card border-0">
+                    <div class="video-thumbnail">
+                        <a href="{{ video.original_url }}" target="_blank">
+                            <img src="{{ video.thumbnail_url }}" class="card-img-top img-fluid" alt="{{ video.judul }}" style="height: 200px; width: 400px; object-fit: cover;">
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ video.judul }}</h5>
+                        <p class="card-text">{{ video.deskripsi|truncate(100) }}</p> <!-- Menampilkan deskripsi singkat -->
+                        <p class="text-muted">Diupload oleh {{ video.uploader }} pada {{ video.tanggal.strftime('%d %B %Y') }}</p> <!-- Menampilkan uploader dan tanggal -->
+                        <div class="embed-responsive embed-responsive-16by9">
+                            <iframe class="embed-responsive-item" src="{{ video.url }}" title="{{ video.judul }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width: 350px"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}SIMAQAH - Beranda{% endblock %}
+
+{% block content %}
+       <!-- Hero Section -->
+    <div class="hero" data-aos="fade-up">
+        <div class="hero-content text-center">
+            <h1 class="welcome-title">Selamat Datang Di <span class="reem-kufi">سِمَاقَة</span></h1>
+            <p class="subtitle">Sistem Informasi Manajemen Qori-Qariah dan Hafidz-Hafidzah</p>
+        </div>
+    </div>
+
+    <!-- Card Section -->
+    <section id="program" class="card-wrapper">
+        <div class="container col-xxl-9">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-3" data-aos="flip-up">
+                    <div class="card text-center p-3">
+                        <div class="card-content">
+                            <p class="mb-3">Pendidikan Tilawatil Qur'an</p>
+                            <img src="../static/icons/quran.png" alt="Tilawatil Qur'an">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3" data-aos="flip-up">
+                    <div class="card text-center p-3">
+                        <div class="card-content">
+                            <p class="mb-3">Pendidikan Hafidzul Qur'an</p>
+                            <img src="../static/icons/mosque.png" alt="Hafidzul Qur'an">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3" data-aos="flip-up">
+                    <div class="card text-center p-3">
+                        <div class="card-content">
+                            <p class="mb-3">Pendidikan Khattil Qur'an</p>
+                            <img src="../static/icons/Alquran.png" alt="Khattil Qur'an">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3" data-aos="flip-up">
+                    <div class="card text-center p-3">
+                        <div class="card-content">
+                            <p class="mb-3">Pendidikan Syarhil Qur'an</p>
+                            <img src="../static/icons/islam.png" alt="Syarhil Qur'an">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Berita -->
+    <section id="berita" class="py-5" data-aos="fade-up">
+        <div class="container py-5">
+            <div class="header-berita text-center">
+                <h2 class="fw-bold">Berita Terbaru</h2>
+            </div>
+
+            <div class="row py-5" data-aos="flip-up" id="berita-container">
+                {% for item in berita %}
+                <div class="col-lg-4 mb-4">
+                    <div class="card border-0">
+                        <img src="{{ url_for('static', filename='uploads/berita/' ~ item.foto) }}" class="card-img-top" alt="{{ item.judul }}" style="height: 200px; width: 380px ;object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.judul }}</h5>
+                            <p class="card-text">{{ item.deskripsi|truncate(100) }}</p>
+                            <p class="text-muted">{{ item.tanggal.strftime('%d %B %Y') }}</p>
+                            <a href="{{ url_for('detail_berita', id=item._id) }}" class="btn btn-danger">Baca Selengkapnya</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="footer-berita text-center">
+                <a href="/berita" class="btn btn-outline-danger">Berita Lainnya ></a>
+            </div>
+        </div>
+    </section>
+    <!-- Berita -->
+
+    <section id="join" class="py-5" data-aos="flip-down">
+        <div class="container py-5">
+          <div class="row d-flex align-items-center">
+            <div class="col-lg-6">
+              <div class="d-flex align-items-center mb-3">
+                <div class="stripe me-2"></div>
+                  <h5>Daftar Santri</h5>
+                
+              </div>
+              <h1 class="fw-bold mb-2">Gabung bersama kami, mewujudkan gerenasi qur'ani</h1>
+              <p class="mb-3">
+                IPQAH Teupah Barat merupakan pesantren pendidikan Al-Quran terbaik di Kabupaten Simeulue. Dengan berhasil meluluskan santri yang berjiwa qur'ani dan menjadi Qari - Qariah yang mampu bersaing dipanggung Nasional.
+              </p>
+              <button class="btn btn-outline-danger">Register</button>
+            </div>
+            <div class="col-lg-6">
+              <img src="/static/images/il-join.png" class="img-fluid" alt="">
+            </div>
+          </div>
+        </div>
+      </section>
+
+        <!-- Video -->
+
+        <!-- Video -->
+    <section id="video" class="py-5" data-aos="fade-up">
+      <div class="container py-5">
+          <div class="header-video text-center">
+              <h2 class="fw-bold">Video Terbaru</h2>
+          </div>
+          <div class="row">
+              {% for video in videos %}
+              <div class="col-lg-4 mb-4">
+                  <div class="card border-0">
+                    
+                      <iframe width="100%" height="200" src="{{ video.url }}" title="{{ video.judul }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                      <div class="card-body">
+                          <h5 class="card-title">{{ video.judul }}</h5>
+                          <p class="card-text">{{ video.deskripsi|truncate(100) }}</p> <!-- Menampilkan deskripsi singkat -->
+                          <p class="text-muted">{{ video.tanggal.strftime('%d %B %Y') }}</p> <!-- Menampilkan tanggal -->
+                      </div>
+                  </div>
+              </div>
+              {% endfor %}
+          </div>
+      </div>
+  </section>
+  <!-- Video -->
+    
+          <!-- Video -->
+    
+          <section id="video_youtube" class="py-5">
+            <div class="container py-5">
+              <div class="header-berita text-center">
+                <h2 class="fw-bold">Video Kegiatan IPQAH Teupah Barat</h2>
+              </div>
+              <div class="row py-5 gy-4" data-aos="zoom-in">
+                <div class="col-lg-4">
+                  <div class="video-wrapper">
+                    <iframe width="100%" height="250" src="https://www.youtube.com/embed/hWqn9TToY68?si=YV4i34TnOIsS_toD" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                  </div>
+                </div>
+
+                <div class="col-lg-4">
+                  <div class="video-wrapper">
+                    <iframe width="100%" height="250" src="https://www.youtube.com/embed/klo7QWvm7rk?si=7CbIceSTynlVibmF" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                  </div>
+                </div>
+
+                <div class="col-lg-4">
+                  <div class="video-wrapper">
+                    <iframe width="100%" height="250" src="https://www.youtube.com/embed/khamKscY07s?si=uR0Qz2gZq4xJZhoM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                  </div>
+                </div>
+              </div>
+              
+            
+              <div class="footer-berita text-center">
+                <a href="{{ url_for('video_kegiatan') }}" class="btn btn-outline-danger">Video Lainnya</a>
+              </div>
+            </div>
+          </section>
+    
+      <!-- Foto Kegiatan -->
+    <section id="foto" class="section-foto parallax bg-foto" data-aos="zoom-in-up">
+      <div class="container">
+          <div class="d-flex justify-content-between align-items-center mb-5">
+              <div class="d-flex align-items-center">
+                  <div class="stripe-putih m-2"></div>
+                  <h5 class="fw-bold text-white">Foto Kegiatan</h5>
+              </div>
+              <div>
+                  <a href="{{ url_for('foto_kegiatan') }}" class="btn btn-outline-white">Foto Lainnya</a>
+              </div>
+          </div>
+
+          <div class="row">
+              {% for photo in photos %}
+              <div class="col-lg-3 col-md-6 col-6">
+                  <a class="image-link" href="{{ url_for('static', filename='uploads/photos/' ~ photo.filename) }}">
+                      <img src="{{ url_for('static', filename='uploads/photos/' ~ photo.filename) }}" class="img-fluid" alt="{{ photo.judul }}">
+                  </a>
+              </div>
+              {% endfor %}
+          </div>
+      </div>
+  </section>
+  <!-- Foto Kegiatan -->
+
+          <!-- Fasilitas -->
+
+          <section id="fasilitas" class="py-5" data-aos="zoom-in-up">
+            <div class="container py-5">
+              <div class="text-center">
+                <h3 class="fw-bold">Fasilitas</h3>
+              </div>
+              <img src="../static/images/Fasilitas.svg" class="img-fluid py-5" alt="">
+    
+              <!-- <div class="text-center">
+                <a href="" class="btn btn-outline-danger">Fasilitas Lainnya></a>
+              </div> -->
+            </div>
+          </section>
+    
+          <!-- Fasilitas -->
+    
+{% endblock %}
+

@@ -1,0 +1,389 @@
+{% extends "pages/admin/base.html" %}
+
+{% block title %}Kelola Video{% endblock %}
+
+{% block head %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap CSS & JS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    .video-thumbnail {
+        position: relative;
+        height: 200px;
+        background: #000;
+        overflow: hidden;
+    }
+    .video-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .video-thumbnail .play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 3rem;
+        opacity: 0.8;
+    }
+    .video-source-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Kelola Video</h2>
+            <p class="text-muted">Manajemen konten video</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addVideoModal">
+                <i class="fas fa-plus me-2"></i>Tambah Video
+            </button>
+        </div>
+    </div>
+
+    <!-- Video Cards -->
+    <div class="row g-4">
+        {% for video in videos %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="video-thumbnail">
+                    <span class="badge bg-{{ 'primary' if video.type == 'youtube' else 'success' }} video-source-badge">
+                        {{ 'YouTube' if video.type == 'youtube' else 'File Lokal' }}
+                    </span>
+                    <img src="{{ video.thumbnail_url if video.type == 'youtube' else url_for('static', filename='uploads/video/thumbnails/' + video.thumbnail) }}" 
+                         alt="{{ video.judul }}">
+                    <div class="play-icon">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ video.judul }}</h5>
+                    <p class="card-text text-muted">
+                        <small>
+                            <i class="fas fa-calendar me-1"></i>{{ video.tanggal.strftime('%d %b %Y') }}
+                        </small>
+                    </p>
+                    <p class="card-text">{{ video.deskripsi|truncate(100) }}</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-info btn-sm preview-video" 
+                                data-id="{{ video._id }}"
+                                data-url="{{ video.url }}"
+                                data-type="{{ video.type }}">
+                            <i class="fas fa-play"></i> Preview
+                        </button>
+                        <button class="btn btn-warning btn-sm edit-video" 
+                                data-id="{{ video._id }}"
+                                data-judul="{{ video.judul }}"
+                                data-deskripsi="{{ video.deskripsi }}"
+                                data-url="{{ video.url }}"
+                                data-type="{{ video.type }}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-video" data-id="{{ video._id }}">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Video Modal -->
+<div class="modal fade" id="addVideoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Video Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addVideoForm">
+                    <div class="mb-3">
+                        <label class="form-label">Judul Video</label>
+                        <input type="text" class="form-control" name="judul" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea class="form-control" name="deskripsi" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jenis Upload</label>
+                        <select class="form-select" name="type" id="uploadType">
+                            <option value="youtube">YouTube URL</option>
+                            <option value="local">File Lokal</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="youtubeUrlInput">
+                        <label class="form-label">YouTube URL</label>
+                        <input type="url" class="form-control" name="youtube_url" 
+                               placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+                    <div class="mb-3 d-none" id="localFileInput">
+                        <label class="form-label">File Video</label>
+                        <input type="file" class="form-control" name="video_file" 
+                               accept="video/*">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="submitAddVideo">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Video Modal -->
+<div class="modal fade" id="previewVideoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Preview Video</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="videoContainer" class="ratio ratio-16x9">
+                    <!-- Video akan dimuat di sini -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Video Modal -->
+<div class="modal fade" id="editVideoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Video</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editVideoForm">
+                    <input type="hidden" name="_id" id="editVideoId">
+                    <div class="mb-3">
+                        <label class="form-label">Judul Video</label>
+                        <input type="text" class="form-control" name="judul" id="editVideoJudul" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea class="form-control" name="deskripsi" id="editVideoDeskripsi" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">URL YouTube (jika ada)</label>
+                        <input type="url" class="form-control" name="youtube_url" id="editVideoUrl">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">File Video (jika ada)</label>
+                        <input type="file" class="form-control" name="video_file" accept="video/*">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="submitEditVideo">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Fungsi untuk mengekstrak ID YouTube dari URL
+    function get_youtube_id(url) {
+        let videoId = '';
+        if (url.includes('youtube.com/watch?v=')) {
+            videoId = url.split('v=')[1].split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1];
+        }
+        return videoId;
+    }
+
+    // Toggle input berdasarkan jenis upload
+    $('#uploadType').change(function() {
+        if ($(this).val() === 'youtube') {
+            $('#youtubeUrlInput').removeClass('d-none');
+            $('#localFileInput').addClass('d-none');
+            // Reset file input
+            $('#localFileInput input[type="file"]').val('');
+        } else {
+            $('#youtubeUrlInput').addClass('d-none');
+            $('#localFileInput').removeClass('d-none');
+            // Reset YouTube URL
+            $('#youtubeUrlInput input[type="url"]').val('');
+        }
+    });
+
+    // Preview Video
+    $('.preview-video').click(function() {
+        const modal = $('#previewVideoModal');
+        const container = $('#videoContainer');
+        const videoType = $(this).data('type');
+        const videoUrl = $(this).data('url');
+
+        if (videoType === 'youtube') {
+            // Ekstrak ID YouTube
+            let videoId = get_youtube_id(videoUrl);
+            if (!videoId) {
+                alert('Video tidak tersedia. Tonton di YouTube.');
+                return;
+            }
+            
+            // Gunakan embed URL yang benar
+            container.html(`
+                <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
+                    title="YouTube video player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+                </iframe>
+            `);
+        } else {
+            // Local video player
+            container.html(`
+                <video controls style="width: 100%; height: 100%;">
+                    <source src="${videoUrl}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            `);
+        }
+
+        // Bersihkan container saat modal ditutup
+        modal.on('hidden.bs.modal', function () {
+            container.empty();
+        });
+
+        modal.modal('show');
+    });
+
+    // Tambah Video
+    $('#submitAddVideo').click(function() {
+        const form = document.getElementById('addVideoForm');
+        const formData = new FormData(form);
+        const uploadType = $('#uploadType').val();
+
+        // Validasi form
+        if (!form.judul.value) {
+            alert('Judul video harus diisi!');
+            return;
+        }
+
+        if (uploadType === 'youtube' && !form.youtube_url.value) {
+            alert('URL YouTube harus diisi!');
+            return;
+        }
+
+        if (uploadType === 'local' && !form.video_file.files[0]) {
+            alert('File video harus dipilih!');
+            return;
+        }
+
+        // Tambahkan type ke formData
+        formData.append('type', uploadType);
+
+        fetch('/admin/kelola-video/tambah', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message || 'Terjadi kesalahan saat menambah video');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menambah video');
+        });
+    });
+
+    // Hapus Video
+    $('.delete-video').click(function() {
+        if (confirm('Apakah Anda yakin ingin menghapus video ini?')) {
+            const videoId = $(this).data('id');
+            
+            fetch(`/admin/kelola-video/hapus/${videoId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Gagal menghapus video');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menghapus video');
+            });
+        }
+    });
+
+    // Event listener untuk tombol edit video
+    $('.edit-video').click(function() {
+        const videoId = $(this).data('id');
+        const judul = $(this).data('judul');
+        const deskripsi = $(this).data('deskripsi');
+        const url = $(this).data('url');
+
+        // Isi data ke dalam modal
+        $('#editVideoId').val(videoId);
+        $('#editVideoJudul').val(judul);
+        $('#editVideoDeskripsi').val(deskripsi);
+        $('#editVideoUrl').val(url);
+
+        // Tampilkan modal
+        $('#editVideoModal').modal('show');
+    });
+
+    // Event listener untuk tombol simpan edit
+    $('#submitEditVideo').click(function() {
+        const form = document.getElementById('editVideoForm');
+        const formData = new FormData(form);
+        const videoId = $('#editVideoId').val();
+
+        fetch(`/admin/kelola-video/edit/${videoId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message || 'Terjadi kesalahan saat mengedit video');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat mengedit video');
+        });
+    });
+});
+</script>
+{% endblock %}

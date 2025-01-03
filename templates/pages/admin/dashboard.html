@@ -1,0 +1,171 @@
+{% extends "pages/admin/base.html" %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Selamat datang, {{ username }}!</h2>
+            <p class="text-muted">Ringkasan aktivitas sistem Anda</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card bg-danger text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Pengguna</h6>
+                            <h2 class="card-title mb-0">{{ total_pengguna }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="badge bg-light text-dark">+{{ pengguna_minggu_ini }}% minggu ini</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Berita</h6>
+                            <h2 class="card-title mb-0">{{ total_berita }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-newspaper fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="badge bg-light text-success">+{{ berita_hari_ini }} hari ini</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Video</h6>
+                            <h2 class="card-title mb-0">{{ total_video }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-video fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="badge bg-light text-warning">+{{ video_minggu_ini }} minggu ini</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Foto</h6>
+                            <h2 class="card-title mb-0">{{ total_foto }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-images fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="badge bg-light text-info">+{{ foto_minggu_ini }} minggu ini</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-secondary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Pengajar</h6>
+                            <h2 class="card-title mb-0">{{ total_pengajar }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span class="badge bg-light text-secondary">+{{ pengajar_minggu_ini }} minggu ini</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Statistik Pengunjung</h5>
+                    <canvas id="visitorChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Distribusi Konten</h5>
+                    <canvas id="contentChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+console.log('Total Berita:', {{ total_berita | tojson }});
+console.log('Total Video:', {{ total_video | tojson }});
+console.log('Total Foto:', {{ total_foto | tojson }});
+
+// Visitor Chart
+const visitorCtx = document.getElementById('visitorChart').getContext('2d');
+new Chart(visitorCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+        datasets: [{
+            label: 'Pengunjung',
+            data: [650, 590, 800, 810, 960, 1000],
+            borderColor: '#2c3e50',
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true
+    }
+});
+
+// Content Distribution Chart
+const contentCtx = document.getElementById('contentChart').getContext('2d');
+new Chart(contentCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Berita', 'Video', 'Foto'],
+        datasets: [{
+            data: [{{ total_berita | default(0) }}, {{ total_video | default(0) }}, {{ total_foto | default(0) }}],
+            backgroundColor: ['#28a745', '#ffc107', '#17a2b8']
+        }]
+    },
+    options: {
+        responsive: true
+    }
+});
+</script>
+{% endblock %}

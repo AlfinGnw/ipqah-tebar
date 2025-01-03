@@ -1,0 +1,213 @@
+{% extends "pages/admin/base.html" %}
+
+{% block title %}Kelola Foto Kegiatan{% endblock %}
+
+{% block head %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap CSS & JS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+    .photo-thumbnail {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-1">Kelola Foto Kegiatan</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPhotoModal">
+            <i class="fas fa-plus me-2"></i>Tambah Foto
+        </button>
+    </div>
+    
+
+    <div class="row g-4">
+        {% for photo in photos %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <img src="{{ url_for('static', filename='uploads/photos/' + photo.filename) }}" class="photo-thumbnail" alt="{{ photo.judul }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ photo.judul }}</h5>
+                    <p class="card-text">{{ photo.deskripsi }}</p>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-warning btn-sm edit-photo" 
+                                data-id="{{ photo._id }}"
+                                data-judul="{{ photo.judul }}"
+                                data-deskripsi="{{ photo.deskripsi }}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-photo" data-id="{{ photo._id }}">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Photo Modal -->
+<div class="modal fade" id="addPhotoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Foto Kegiatan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPhotoForm">
+                    <div class="mb-3">
+                        <label class="form-label">Judul</label>
+                        <input type="text" class="form-control" name="judul" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea class="form-control" name="deskripsi" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">File Foto</label>
+                        <input type="file" class="form-control" name="foto" accept="image/*" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="submitAddPhoto">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Photo Modal -->
+<div class="modal fade" id="editPhotoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Foto Kegiatan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editPhotoForm">
+                    <input type="hidden" name="_id" id="editPhotoId">
+                    <div class="mb-3">
+                        <label class="form-label">Judul</label>
+                        <input type="text" class="form-control" name="judul" id="editPhotoJudul" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea class="form-control" name="deskripsi" id="editPhotoDeskripsi" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">File Foto (jika ada)</label>
+                        <input type="file" class="form-control" name="foto" accept="image/*">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="submitEditPhoto">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Tambah Foto
+    $('#submitAddPhoto').click(function() {
+        const form = document.getElementById('addPhotoForm');
+        const formData = new FormData(form);
+
+        fetch('/admin/kelola-foto/tambah', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message || 'Terjadi kesalahan saat menambah foto');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menambah foto');
+        });
+    });
+
+    // Event listener untuk tombol edit foto
+    $('.edit-photo').click(function() {
+        const photoId = $(this).data('id');
+        const judul = $(this).data('judul');
+        const deskripsi = $(this).data('deskripsi');
+
+        // Isi data ke dalam modal
+        $('#editPhotoId').val(photoId);
+        $('#editPhotoJudul').val(judul);
+        $('#editPhotoDeskripsi').val(deskripsi);
+
+        // Tampilkan modal
+        $('#editPhotoModal').modal('show');
+    });
+
+    // Simpan perubahan foto
+    $('#submitEditPhoto').click(function() {
+        const form = document.getElementById('editPhotoForm');
+        const formData = new FormData(form);
+        const photoId = $('#editPhotoId').val();
+
+        fetch(`/admin/kelola-foto/edit/${photoId}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message || 'Terjadi kesalahan saat mengedit foto');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat mengedit foto');
+        });
+    });
+
+    // Hapus Foto
+    $('.delete-photo').click(function() {
+        if (confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
+            const photoId = $(this).data('id');
+            
+            fetch(`/admin/kelola-foto/hapus/${photoId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Gagal menghapus foto');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menghapus foto');
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
