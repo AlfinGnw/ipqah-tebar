@@ -93,6 +93,13 @@ def create_admin():
 # Panggil fungsi untuk membuat admin hanya sekali (Anda bisa menghapus ini setelah admin dibuat)
 # create_admin()
 
+# Fungsi slugify
+def slugify(text):
+    return re.sub(r'[\W_]+', '-', text.lower()).strip('-')
+
+# Daftarkan filter slugify
+app.jinja_env.filters['slugify'] = slugify
+
 @app.route('/')
 def index():
     # Ambil 3 berita terbaru dari database
@@ -771,10 +778,15 @@ def berita():
 
     return render_template('pages/berita.html', berita=berita_list)
 
-@app.route('/berita/<id>')
-def detail_berita(id):
+@app.route('/berita/<id>/<slug>')
+def detail_berita(id, slug):
     berita = db.berita.find_one({"_id": ObjectId(id)})
     if berita:
+        # Verify that the slug matches
+        correct_slug = slugify(berita['judul'])
+        if slug != correct_slug:
+            # Redirect to the correct URL if slug doesn't match
+            return redirect(url_for('detail_berita', id=id, slug=correct_slug))
         return render_template('pages/detail_berita.html', berita=berita)
     else:
         return "Berita tidak ditemukan", 404

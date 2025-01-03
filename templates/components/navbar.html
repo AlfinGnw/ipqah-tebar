@@ -1,56 +1,115 @@
 <style>
-    /* Mengubah warna ikon hamburger menjadi putih */
-    .navbar-toggler {
-        border-color: white; /* Mengatur warna border tombol hamburger */
-    }
+  /* Mengubah warna ikon hamburger menjadi putih */
+  .navbar-toggler {
+    border-color: white; /* Mengatur warna border tombol hamburger */
+  }
 
-    .navbar-toggler-icon {
-        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath stroke='white' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E"); /* Mengatur warna ikon hamburger menjadi putih */
-    }
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath stroke='white' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E"); /* Mengatur warna ikon hamburger menjadi putih */
+  }
 
-    /* Jika navbar tidak dalam mode gelap, gunakan warna default */
-    .navbar-light .navbar-toggler-icon {
-        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath stroke='black' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-    }
+  /* Jika navbar tidak dalam mode gelap, gunakan warna default */
+  .navbar-light .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath stroke='black' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+  }
+
+  /* Mengubah warna ikon hamburger menjadi putih */
+  /* Menghilangkan overflow horizontal pada body */
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Menghilangkan padding atau margin yang menyebabkan overflow */
+  .navbar {
+    width: 100%; /* Memastikan navbar memanfaatkan seluruh lebar */
+    box-sizing: border-box; /* Untuk menghindari overflow */
+  }
+
+  /* Pastikan navbar-collapse tidak menambah margin ekstra */
+  .navbar-collapse {
+    padding: 0;
+    margin: 0;
+  }
 </style>
 
-<nav class="navbar navbar-expand-lg fixed-top {% if request.path != '/' %}bg-dark text-white{% else %}navbar-light{% endif %}">
-    <div class="container-fluid">
-        
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('index') }}">Beranda</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('berita') }}">Berita</a></li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" id="mediaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Media
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mediaDropdown">
-                        <li><a class="dropdown-item" href="{{ url_for('foto_kegiatan') }}">Foto Kegiatan</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('video_kegiatan') }}">Video Kegiatan</a></li>
-                    </ul>
-                </li>
-                
-                <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('teachers') }}">Guru</a></li>
-                
-                {% if session.get('user_id') %}
-                       {% if session.get('role') in ['admin', 'super_admin'] %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
-                        </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a href="{{ url_for('logout') }}" class="btn btn-danger ms-3">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a href="{{ url_for('login') }}" class="btn btn-outline-danger ms-3">Login</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
+<nav
+  class="navbar navbar-expand-lg fixed-top {% if request.path != '/' %}bg-dark text-white{% else %}navbar-light{% endif %}"
+>
+  <div class="container-fluid">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{{ url_for('index') }}"
+            >Beranda</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{{ url_for('berita') }}"
+            >Berita</a
+          >
+        </li>
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link dropdown-toggle text-white"
+            href="#"
+            id="mediaDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Media
+          </a>
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="mediaDropdown"
+          >
+            <li>
+              <a class="dropdown-item" href="{{ url_for('foto_kegiatan') }}"
+                >Foto Kegiatan</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item" href="{{ url_for('video_kegiatan') }}"
+                >Video Kegiatan</a
+              >
+            </li>
+          </ul>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{{ url_for('teachers') }}"
+            >Guru</a
+          >
+        </li>
+
+        {% if session.get('user_id') %} {% if session.get('role') in ['admin',
+        'super_admin'] %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+        </li>
+        {% endif %}
+        <li class="nav-item">
+          <a href="{{ url_for('logout') }}" class="btn btn-danger ms-3"
+            >Logout</a
+          >
+        </li>
+        {% else %}
+        <li class="nav-item">
+          <a href="{{ url_for('login') }}" class="btn btn-outline-danger ms-3"
+            >Login</a
+          >
+        </li>
+        {% endif %}
+      </ul>
     </div>
+  </div>
 </nav>

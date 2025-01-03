@@ -8,22 +8,25 @@
 
     <div class="container py-5 mt-5">
         <h2 class="text-center mb-4">Video Kegiatan</h2>
-        <div class="row">
+        <div class="row g-4">
             {% for video in videos %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card border-0">
-                    <div class="video-thumbnail">
-                        <a href="{{ video.original_url }}" target="_blank">
-                            <img src="{{ video.thumbnail_url }}" class="card-img-top img-fluid" alt="{{ video.judul }}" style="height: 200px; width: 400px; object-fit: cover;">
-                        </a>
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0">
+                    
+                    <div class="card-body d-flex flex-column">
+                        <div class="video-wrapper position-relative mt-auto" style="padding-top: 56.25%;">
+                            <iframe 
+                            class="position-absolute top-0 start-0 w-100 h-100"
+                            src="{{ video.url }}" 
+                            title="{{ video.judul }}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                        </iframe>
                     </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ video.judul }}</h5>
-                        <p class="card-text">{{ video.deskripsi|truncate(100) }}</p> <!-- Menampilkan deskripsi singkat -->
-                        <p class="text-muted">Diupload oleh {{ video.uploader }} pada {{ video.tanggal.strftime('%d %B %Y') }}</p> <!-- Menampilkan uploader dan tanggal -->
-                        <div class="embed-responsive embed-responsive-16by9">
-                            <iframe class="embed-responsive-item" src="{{ video.url }}" title="{{ video.judul }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width: 350px"></iframe>
-                        </div>
+                    <h5 class="card-title">{{ video.judul }}</h5>
+                    <p class="card-text">{{ video.deskripsi|truncate(100) }}</p>
+                    <p class="text-muted">Diupload oleh {{ video.uploader }} pada {{ video.tanggal.strftime('%d %B %Y') }}</p>
                     </div>
                 </div>
             </div>
@@ -31,4 +34,31 @@
         </div>
     </div>
 
+    <style>
+        .video-thumbnail {
+            overflow: hidden;
+            border-radius: calc(0.375rem - 1px);
+        }
+        
+        .video-wrapper {
+            overflow: hidden;
+            border-radius: 0.375rem;
+            background-color: #000;
+        }
+        
+        .card {
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+    </style>
 {% endblock %}

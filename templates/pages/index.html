@@ -3,6 +3,19 @@
 {% block title %}SIMAQAH - Beranda{% endblock %}
 
 {% block content %}
+
+<style>
+  .card-img-wrapper {
+    overflow: hidden;
+    border-radius: calc(0.375rem - 1px);
+}
+
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1.5rem;
+    }
+}
+</style>
        <!-- Hero Section -->
     <div class="hero" data-aos="fade-up">
         <div class="hero-content text-center">
@@ -52,34 +65,38 @@
     </section>
 
     <!-- Berita -->
-    <section id="berita" class="py-5" data-aos="fade-up">
-        <div class="container py-5">
-            <div class="header-berita text-center">
-                <h2 class="fw-bold">Berita Terbaru</h2>
-            </div>
+<section id="berita" class="py-5" data-aos="fade-up">
+  <div class="container py-5">
+      <div class="header-berita text-center">
+          <h2 class="fw-bold">Berita Terbaru</h2>
+      </div>
 
-            <div class="row py-5" data-aos="flip-up" id="berita-container">
-                {% for item in berita %}
-                <div class="col-lg-4 mb-4">
-                    <div class="card border-0">
-                        <img src="{{ url_for('static', filename='uploads/berita/' ~ item.foto) }}" class="card-img-top" alt="{{ item.judul }}" style="height: 200px; width: 380px ;object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ item.judul }}</h5>
-                            <p class="card-text">{{ item.deskripsi|truncate(100) }}</p>
-                            <p class="text-muted">{{ item.tanggal.strftime('%d %B %Y') }}</p>
-                            <a href="{{ url_for('detail_berita', id=item._id) }}" class="btn btn-danger">Baca Selengkapnya</a>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+      <div class="row py-5 g-4" data-aos="flip-up" id="berita-container">
+          {% for item in berita %}
+          <div class="col-lg-4 col-md-6">
+              <div class="card h-100 border-0">
+                  <div class="card-img-wrapper position-relative" style="padding-top: 56.25%;">
+                      <img src="{{ url_for('static', filename='uploads/berita/' ~ item.foto) }}" 
+                           class="card-img-top position-absolute top-0 start-0 w-100 h-100"
+                           alt="{{ item.judul }}" 
+                           style="object-fit: cover;">
+                  </div>
+                  <div class="card-body d-flex flex-column">
+                      <h5 class="card-title">{{ item.judul }}</h5>
+                      <p class="card-text">{{ item.deskripsi|truncate(100) }}</p>
+                      <p class="text-muted">{{ item.tanggal.strftime('%d %B %Y') }}</p>
+                      <a href="{{ url_for('detail_berita', id=item._id, slug=item.judul|slugify) }}" class="btn btn-danger mt-auto">Baca Selengkapnya</a>
+                  </div>
+              </div>
+          </div>
+          {% endfor %}
+      </div>
 
-            <div class="footer-berita text-center">
-                <a href="/berita" class="btn btn-outline-danger">Berita Lainnya ></a>
-            </div>
-        </div>
-    </section>
-    <!-- Berita -->
+      <div class="footer-berita text-center">
+          <a href="/berita" class="btn btn-outline-danger">Berita Lainnya ></a>
+      </div>
+  </div>
+</section>
 
     <section id="join" class="py-5" data-aos="flip-down">
         <div class="container py-5">
